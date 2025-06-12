@@ -5,265 +5,554 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>服务器批量管理平台</title>
     <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #7c3aed;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+            --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            --border-radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--background-gradient);
             min-height: 100vh;
             padding: 20px;
+            line-height: 1.6;
         }
-        
+
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
             overflow: hidden;
         }
-        
+
         .header {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
-            padding: 30px;
+            padding: 2rem;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+
         .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            z-index: 1;
+            position: relative;
         }
-        
+
         .header p {
             opacity: 0.9;
             font-size: 1.1rem;
+            z-index: 1;
+            position: relative;
         }
-        
+
         .nav-tabs {
             display: flex;
             background: #f8fafc;
             border-bottom: 1px solid #e5e7eb;
+            overflow-x: auto;
         }
-        
+
         .nav-tab {
             flex: 1;
-            padding: 20px;
+            min-width: 120px;
+            padding: 1.25rem;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: var(--transition);
             font-weight: 500;
             border-bottom: 3px solid transparent;
+            white-space: nowrap;
         }
-        
+
         .nav-tab:hover {
             background: #e0e7ff;
+            transform: translateY(-2px);
         }
-        
+
         .nav-tab.active {
             background: white;
-            border-bottom-color: #4f46e5;
-            color: #4f46e5;
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
         }
-        
+
         .content {
-            padding: 30px;
+            padding: 2rem;
+            min-height: 500px;
         }
-        
+
         .tab-content {
             display: none;
+            animation: fadeIn 0.3s ease-in-out;
         }
-        
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .tab-content.active {
             display: block;
         }
-        
-        .form-group {
-            margin-bottom: 20px;
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        
+
+        .form-card {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 0.5rem;
             font-weight: 500;
             color: #374151;
         }
-        
-        .form-group input, .form-group textarea, .form-group select {
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
             width: 100%;
-            padding: 12px;
+            padding: 0.75rem;
             border: 2px solid #e5e7eb;
             border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            font-size: 0.95rem;
+            transition: var(--transition);
         }
-        
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
             outline: none;
-            border-color: #4f46e5;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
-        
+
         .form-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
         }
-        
+
         .btn {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 0.75rem 1.5rem;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 0.95rem;
             font-weight: 500;
-            transition: transform 0.2s;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
         }
-        
+
         .btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(79, 70, 229, 0.3);
         }
-        
+
         .btn-danger {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
         }
-        
+
+        .btn-danger:hover {
+            box-shadow: 0 8px 15pxrgba(239, 68, 68, 0.3);
+        }
+
         .btn-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
         }
-        
-        .server-list {
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .server-grid {
             display: grid;
-            gap: 15px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
         }
-        
+
         .server-card {
-            background: #f8fafc;
+            background: white;
             border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 20px;
-            transition: all 0.3s;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        .server-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transform: scaleX(0);
+            transition: var(--transition);
+        }
+
         .server-card:hover {
-            border-color: #4f46e5;
-            transform: translateY(-2px);
+            border-color: var(--primary-color);
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow);
         }
-        
+
+        .server-card:hover::before {
+            transform: scaleX(1);
+        }
+
         .server-card.selected {
-            border-color: #4f46e5;
+            border-color: var(--primary-color);
             background: #e0e7ff;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
-        
+
         .server-header {
             display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 10px;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
         }
-        
+
         .server-name {
-            font-weight: bold;
-            font-size: 1.2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
             color: #1f2937;
+            margin-bottom: 0.25rem;
         }
-        
+
+        .server-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
         .server-info {
             color: #6b7280;
-            margin-bottom: 10px;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
         }
-        
+
         .server-actions {
             display: flex;
-            gap: 10px;
+            gap: 0.5rem;
+            margin-top: 1rem;
         }
-        
-        .results-container {
-            margin-top: 20px;
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
         }
-        
-        .result-item {
+
+        .checkbox-card {
             background: #f8fafc;
-            border-left: 4px solid #10b981;
-            padding: 15px;
-            margin-bottom: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .checkbox-card:hover {
+            border-color: var(--primary-color);
+        }
+
+        .checkbox-card.selected {
+            border-color: var(--primary-color);
+            background: #e0e7ff;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+        }
+
+        .results-container {
+            margin-top: 2rem;
+        }
+
+        .result-grid {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .result-item {
+            background: white;
+            border-left: 4px solid var(--success-color);
             border-radius: 0 8px 8px 0;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: var(--transition);
         }
-        
+
+        .result-item:hover {
+            transform: translateX(4px);
+        }
+
         .result-item.error {
-            border-left-color: #ef4444;
+            border-left-color: var(--danger-color);
         }
-        
+
         .result-header {
-            font-weight: bold;
-            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-weight: 600;
             color: #1f2937;
         }
-        
+
+        .result-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
         .result-output {
-            background: #1f2937;
-            color: #10b981;
-            padding: 15px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: 0.85rem;
             white-space: pre-wrap;
             overflow-x: auto;
+            line-height: 1.4;
         }
-        
+
+        .result-output.error {
+            color: #ff6b6b;
+        }
+
         .loading {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 40px;
+            padding: 3rem;
+            gap: 1rem;
         }
-        
+
         .spinner {
             width: 40px;
             height: 40px;
-            border: 4px solid #e5e7eb;
-            border-top: 4px solid #4f46e5;
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid var(--primary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        .alert {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+
+        .loading-text {
+            color: #6b7280;
+            font-weight: 500;
         }
-        
+
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
         .alert-success {
             background: #d1fae5;
             color: #065f46;
             border: 1px solid #10b981;
         }
-        
+
         .alert-error {
             background: #fee2e2;
             color: #991b1b;
             border: 1px solid #ef4444;
         }
-        
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
         }
-        
-        .checkbox-container input[type="checkbox"] {
-            width: auto;
-            margin-right: 10px;
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 8px;
+            }
+
+            .header {
+                padding: 1.5rem;
+            }
+
+            .content {
+                padding: 1rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .server-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+
+            .nav-tab {
+                min-width: auto;
+                flex: 1;
+            }
         }
     </style>
 </head>
@@ -271,302 +560,341 @@
     <div class="container">
         <div class="header">
             <h1>🖥️ 服务器批量管理平台</h1>
-            <p>高效管理多台服务器，批量执行命令</p>
+            <p>高效管理多台服务器，一键批量执行命令</p>
         </div>
-        
+
         <div class="nav-tabs">
-            <div class="nav-tab active" onclick="switchTab('servers')">服务器管理</div>
-            <div class="nav-tab" onclick="switchTab('execute')">批量执行</div>
-            <div class="nav-tab" onclick="switchTab('tasks')">任务历史</div>
+            <div class="nav-tab active" onclick="switchTab('servers')">
+                📋 服务器管理
+            </div>
+            <div class="nav-tab" onclick="switchTab('execute')">
+                ⚡ 批量执行
+            </div>
+            <div class="nav-tab" onclick="switchTab('tasks')">
+                📊 任务历史
+            </div>
+            <div class="nav-tab" onclick="switchTab('templates')">
+                📝 命令模板
+            </div>
         </div>
-        
+
         <div class="content">
             <!-- 服务器管理 -->
             <div id="servers" class="tab-content active">
-                <h2>添加服务器</h2>
-                <form id="serverForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>服务器名称</label>
-                            <input type="text" id="serverName" required>
+                <div class="stats-grid" id="serverStats"></div>
+
+                <div class="form-card">
+                    <h2 class="section-title">➕ 添加服务器</h2>
+                    <form id="serverForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>服务器名称</label>
+                                <input type="text" id="serverName" placeholder="例如: Web服务器-01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>主机地址</label>
+                                <input type="text" id="serverHost" placeholder="192.168.1.100" required>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>主机地址</label>
-                            <input type="text" id="serverHost" required>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>SSH端口</label>
+                                <input type="number" id="serverPort" value="22" min="1" max="65535" required>
+                            </div>
+                            <div class="form-group">
+                                <label>用户名</label>
+                                <input type="text" id="serverUsername" placeholder="root" required>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>端口</label>
-                            <input type="number" id="serverPort" value="22" required>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>SSH密码</label>
+                                <input type="password" id="serverPassword" placeholder="请输入SSH密码" required>
+                            </div>
+                            <div class="form-group">
+                                <label>服务器描述</label>
+                                <input type="text" id="serverDescription" placeholder="服务器用途描述（可选）">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>用户名</label>
-                            <input type="text" id="serverUsername" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>密码</label>
-                            <input type="password" id="serverPassword" required>
-                        </div>
-                        <div class="form-group">
-                            <label>描述</label>
-                            <input type="text" id="serverDescription">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn">添加服务器</button>
-                </form>
-                
-                <h2 style="margin-top: 40px;">服务器列表</h2>
-                <div id="serverList" class="server-list"></div>
+                        <button type="submit" class="btn">
+                            ➕ 添加服务器
+                        </button>
+                    </form>
+                </div>
+
+                <h2 class="section-title">🖥️ 服务器列表</h2>
+                <div id="serverList" class="server-grid"></div>
             </div>
-            
+
             <!-- 批量执行 -->
             <div id="execute" class="tab-content">
-                <h2>批量执行命令</h2>
-                <form id="executeForm">
-                    <div class="form-group">
-                        <label>任务名称</label>
-                        <input type="text" id="taskName" required>
-                    </div>
-                    <div class="form-group">
-                        <label>执行命令</label>
-                        <textarea id="command" rows="4" required placeholder="例如: df -h && free -m"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>选择服务器</label>
-                        <div id="serverSelector"></div>
-                    </div>
-                    <button type="submit" class="btn">执行命令</button>
-                </form>
-                
+                <div class="form-card">
+                    <h2 class="section-title">⚡ 批量执行命令</h2>
+                    <form id="executeForm">
+                        <div class="form-group">
+                            <label>任务名称</label>
+                            <input type="text" id="taskName" placeholder="例如: 系统状态检查" required>
+                        </div>
+                        <div class="form-group">
+                            <label>执行命令</label>
+                            <textarea id="command" rows="4" placeholder="例如: df -h && free -m && uptime" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>选择目标服务器</label>
+                            <div id="serverSelector" class="checkbox-grid"></div>
+                        </div>
+                        <button type="submit" class="btn">
+                            🚀 执行命令
+                        </button>
+                    </form>
+                </div>
+
                 <div id="executeResults" class="results-container"></div>
             </div>
-            
+
             <!-- 任务历史 -->
             <div id="tasks" class="tab-content">
-                <h2>任务历史</h2>
+                <h2 class="section-title">📊 任务执行历史</h2>
                 <div id="taskHistory"></div>
+            </div>
+
+            <!-- 命令模板 -->
+            <div id="templates" class="tab-content">
+                <div class="form-card">
+                    <h2 class="section-title">➕ 创建命令模板</h2>
+                    <form id="templateForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>模板名称</label>
+                                <input type="text" id="templateName" placeholder="例如: 系统监控" required>
+                            </div>
+                            <div class="form-group">
+                                <label>分类</label>
+                                <select id="templateCategory">
+                                    <option value="system">系统管理</option>
+                                    <option value="monitor">监控检查</option>
+                                    <option value="deployment">部署相关</option>
+                                    <option value="maintenance">维护操作</option>
+                                    <option value="general">通用命令</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>命令内容</label>
+                            <textarea id="templateCommand" rows="4" placeholder="输入命令模板..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>模板描述</label>
+                            <input type="text" id="templateDescription" placeholder="描述这个模板的用途...">
+                        </div>
+                        <button type="submit" class="btn">
+                            💾 保存模板
+                        </button>
+                    </form>
+                </div>
+
+                <h2 class="section-title">📝 命令模板库</h2>
+                <div id="templateList"></div>
             </div>
         </div>
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8000';
+        // 配置
+        const API_BASE = '/api';
+
+        // 全局状态
         let servers = [];
         let selectedServers = [];
+        let templates = [];
 
-        // 初始化
+        // 初始化应用
         document.addEventListener('DOMContentLoaded', function() {
-            loadServers();
-            
-            // 表单提交事件
-            document.getElementById('serverForm').addEventListener('submit', addServer);
-            document.getElementById('executeForm').addEventListener('submit', executeCommand);
+            initializeApp();
+            setupEventListeners();
         });
+
+        // 应用初始化
+        async function initializeApp() {
+            showLoadingState();
+            try {
+                await Promise.all([
+                    loadServers(),
+                    loadTemplates()
+                ]);
+                updateServerStats();
+            } catch (error) {
+                console.error('应用初始化失败:', error);
+                showAlert('应用初始化失败，请刷新页面重试', 'error');
+            }
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            document.getElementById('serverForm').addEventListener('submit', handleAddServer);
+            document.getElementById('executeForm').addEventListener('submit', handleExecuteCommand);
+            document.getElementById('templateForm').addEventListener('submit', handleCreateTemplate);
+        }
+
+        // 显示加载状态
+        function showLoadingState() {
+            const containers = ['serverList', 'serverSelector', 'templateList'];
+            containers.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.innerHTML = `
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <div class="loading-text">加载中...</div>
+                        </div>
+                    `;
+                }
+            });
+        }
 
         // 切换标签页
         function switchTab(tabName) {
             // 更新标签状态
-            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelector(`.nav-tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
-            
-            // 更新内容
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // 更新内容显示
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
             document.getElementById(tabName).classList.add('active');
-            
-            // 如果切换到执行页面，更新服务器选择器
-            if (tabName === 'execute') {
-                updateServerSelector();
+
+            // 执行特定的初始化操作
+            switch(tabName) {
+                case 'execute':
+                    updateServerSelector();
+                    break;
+                case 'tasks':
+                    loadTaskHistory();
+                    break;
+                case 'templates':
+                    loadTemplates();
+                    break;
             }
         }
 
-        // 加载服务器列表
+        // 服务器管理相关函数
         async function loadServers() {
             try {
                 const response = await fetch(`${API_BASE}/servers/`);
+                if (!response.ok) throw new Error('网络请求失败');
+
                 servers = await response.json();
                 updateServerList();
                 updateServerSelector();
+                updateServerStats();
             } catch (error) {
                 console.error('加载服务器列表失败:', error);
                 showAlert('加载服务器列表失败', 'error');
+                showEmptyState('serverList', '📡', '无法加载服务器列表');
             }
         }
 
-        // 更新服务器列表显示
+        function updateServerStats() {
+            const activeServers = servers.filter(s => s.is_active).length;
+            const totalServers = servers.length;
+
+            document.getElementById('serverStats').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${totalServers}</div>
+                    <div class="stat-label">总服务器数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${activeServers}</div>
+                    <div class="stat-label">活跃服务器</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${totalServers - activeServers}</div>
+                    <div class="stat-label">已禁用</div>
+                </div>
+            `;
+        }
+
         function updateServerList() {
             const container = document.getElementById('serverList');
+
             if (servers.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 40px;">暂无服务器</p>';
+                showEmptyState('serverList', '🖥️', '暂无服务器', '点击上方添加您的第一台服务器');
                 return;
             }
-            
+
             container.innerHTML = servers.map(server => `
                 <div class="server-card">
                     <div class="server-header">
-                        <div class="server-name">${server.name}</div>
-                        <div class="server-actions">
-                            <button class="btn btn-danger" onclick="deleteServer(${server.id})">删除</button>
+                        <div>
+                            <div class="server-name">${server.name}</div>
+                            <span class="server-status ${server.is_active ? 'status-active' : 'status-inactive'}">
+                                ${server.is_active ? '🟢 活跃' : '🔴 已禁用'}
+                            </span>
                         </div>
                     </div>
                     <div class="server-info">
-                        <strong>地址:</strong> ${server.host}:${server.port} |
-                        <strong>用户:</strong> ${server.username} |
-                        <strong>状态:</strong> ${server.is_active ? '活跃' : '已禁用'}
+                        <strong>地址:</strong> ${server.host}:${server.port}
+                    </div>
+                    <div class="server-info">
+                        <strong>用户:</strong> ${server.username}
                     </div>
                     ${server.description ? `<div class="server-info"><strong>描述:</strong> ${server.description}</div>` : ''}
+                    <div class="server-actions">
+                        <button class="btn btn-danger btn-small" onclick="deleteServer(${server.id})">
+                            🗑️ 删除
+                        </button>
+                    </div>
                 </div>
             `).join('');
         }
 
-        // 更新服务器选择器
         function updateServerSelector() {
             const container = document.getElementById('serverSelector');
-            container.innerHTML = servers.map(server => `
-                <div class="checkbox-container">
-                    <input type="checkbox" id="server_${server.id}" value="${server.id}" onchange="updateSelectedServers()">
-                    <label for="server_${server.id}">${server.name} (${server.host})</label>
-                </div>
-            `).join('');
-        }
 
-        // 更新选中的服务器
-        function updateSelectedServers() {
-            selectedServers = Array.from(document.querySelectorAll('#serverSelector input:checked'))
-                                   .map(checkbox => parseInt(checkbox.value));
-        }
-
-        // 添加服务器
-        async function addServer(event) {
-            event.preventDefault();
-            
-            const serverData = {
-                name: document.getElementById('serverName').value,
-                host: document.getElementById('serverHost').value,
-                port: parseInt(document.getElementById('serverPort').value),
-                username: document.getElementById('serverUsername').value,
-                password: document.getElementById('serverPassword').value,
-                description: document.getElementById('serverDescription').value
-            };
-            
-            try {
-                const response = await fetch(`${API_BASE}/servers/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(serverData)
-                });
-                
-                if (response.ok) {
-                    showAlert('服务器添加成功!', 'success');
-                    document.getElementById('serverForm').reset();
-                    document.getElementById('serverPort').value = '22';
-                    loadServers();
-                } else {
-                    throw new Error('添加失败');
-                }
-            } catch (error) {
-                console.error('添加服务器失败:', error);
-                showAlert('添加服务器失败', 'error');
-            }
-        }
-
-        // 删除服务器
-        async function deleteServer(serverId) {
-            if (!confirm('确定要删除这台服务器吗？')) return;
-            
-            try {
-                const response = await fetch(`${API_BASE}/servers/${serverId}`, {
-                    method: 'DELETE'
-                });
-                
-                if (response.ok) {
-                    showAlert('服务器删除成功!', 'success');
-                    loadServers();
-                } else {
-                    throw new Error('删除失败');
-                }
-            } catch (error) {
-                console.error('删除服务器失败:', error);
-                showAlert('删除服务器失败', 'error');
-            }
-        }
-
-        // 执行命令
-        async function executeCommand(event) {
-            event.preventDefault();
-            
-            if (selectedServers.length === 0) {
-                showAlert('请至少选择一台服务器', 'error');
+            if (servers.length === 0) {
+                container.innerHTML = '<div class="empty-state">请先添加服务器</div>';
                 return;
             }
-            
-            const executeData = {
-                task_name: document.getElementById('taskName').value,
-                command: document.getElementById('command').value,
-                server_ids: selectedServers
-            };
-            
-            // 显示加载状态
-            const resultsContainer = document.getElementById('executeResults');
-            resultsContainer.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-            
-            try {
-                const response = await fetch(`${API_BASE}/execute/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(executeData)
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    showExecuteResults(result.results);
-                    showAlert(result.message, 'success');
-                    document.getElementById('executeForm').reset();
-                } else {
-                    throw new Error(result.detail || '执行失败');
-                }
-            } catch (error) {
-                console.error('命令执行失败:', error);
-                showAlert(`命令执行失败: ${error.message}`, 'error');
-                resultsContainer.innerHTML = '';
-            }
-        }
 
-        // 显示执行结果
-        function showExecuteResults(results) {
-            const container = document.getElementById('executeResults');
-            container.innerHTML = '<h3>执行结果</h3>' + results.map(result => `
-                <div class="result-item ${result.exit_code !== 0 ? 'error' : ''}">
-                    <div class="result-header">
-                        ${result.server.name} (${result.server.host}) - 
-                        ${result.exit_code === 0 ? '✅ 成功' : '❌ 失败'} - 
-                        耗时: ${result.execution_time}秒
+            container.innerHTML = servers.filter(s => s.is_active).map(server => `
+                <div class="checkbox-card" onclick="toggleServerSelection(${server.id}, this)">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="server_${server.id}" value="${server.id}">
+                        <label for="server_${server.id}">
+                            <strong>${server.name}</strong><br>
+                            <small>${server.host}:${server.port}</small>
+                        </label>
                     </div>
-                    ${result.output ? `<div class="result-output">${result.output}</div>` : ''}
-                    ${result.error ? `<div class="result-output" style="color: #ef4444;">${result.error}</div>` : ''}
                 </div>
             `).join('');
         }
 
-        // 显示提示信息
-        function showAlert(message, type) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type}`;
-            alertDiv.textContent = message;
-            
-            document.querySelector('.content').prepend(alertDiv);
-            
-            setTimeout(() => {
-                alertDiv.remove();
-            }, 5000);
+        function toggleServerSelection(serverId, cardElement) {
+            const checkbox = cardElement.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+
+            if (checkbox.checked) {
+                cardElement.classList.add('selected');
+                selectedServers.push(serverId);
+            } else {
+                cardElement.classList.remove('selected');
+                selectedServers = selectedServers.filter(id => id !== serverId);
+            }
         }
-    </script>
-</body>
-</html>
+
+        async function handleAddServer(event) {
+            event.preventDefault();
+
+            const serverData = {
+                name: document.getElementById('serverName').value.trim(),
+                host: document.getElementById('serverHost').value.trim(),
+                port: parseInt(document.getElementById('serverPort').value),
+                username: document.getElementById('serverUsername').value.trim(),
+                password: document.getElementById('serverPassword').value,
+                description: document.getElementById('serverDescription').value.trim()
+            };
+
+            // 客户端验
