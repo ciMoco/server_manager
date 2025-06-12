@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from models import Server, Task, TaskResult
-from schemas import ServerCreate
+from models import Server, Task, TaskResult, CommandTemplate, ScheduledTask
+from schemas import ServerCreate, CommandTemplateCreate, ScheduledTaskCreate
 from datetime import datetime
 
 def create_server(db: Session, server: ServerCreate):
@@ -35,6 +35,15 @@ def create_task(db: Session, task_name: str, command: str, server_ids: str):
     db.refresh(db_task)
     return db_task
 
+def get_tasks(db: Session, skip: int = 0, limit: int = 100, status: str = None):
+    query = db.query(Task)
+    if status:
+        query = query.filter(Task.status == status)
+    return query.order_by(Task.created_at.desc()).offset(skip).limit(limit).all()
+
+def get_task(db: Session, task_id: int):
+    return db.query(Task).filter(Task.id == task_id).first()
+
 def update_task_status(db: Session, task_id: int, status: str):
     task = db.query(Task).filter(Task.id == task_id).first()
     if task:
@@ -63,3 +72,60 @@ def create_task_result(db: Session, task_id: int, server_id: int, server_name: s
 
 def get_task_results(db: Session, task_id: int):
     return db.query(TaskResult).filter(TaskResult.task_id == task_id).all()
+
+# 命令模板相关
+def create_command_template(db: Session, template: CommandTemplateCreate):
+    db_template = CommandTemplate(**template.dict())
+    db.add(db_template)
+    db.commit()
+    db.refresh(db_template)
+    return db_template
+
+def get_command_templates(db: Session, category: str = None):
+    query = db.query(CommandTemplate)
+    if category:
+        query = query.filter(CommandTemplate.category == category)
+    return query.order_by(CommandTemplate.created_at.desc()).all()
+
+def get_command_template(db: Session, template_id: int):
+    return db.query(CommandTemplate).filter(CommandTemplate.id == template_id).first()
+
+def delete_command_template(db: Session, template_id: int):
+    template = db.query(CommandTemplate).filter(CommandTemplate.id == template_id).first()
+    if template:
+        db.delete(template)
+        db.commit()
+    return template
+
+# 定时任务相关
+def create_scheduled_task(db: Session, task: ScheduledTaskCreate):
+    task_data = task.dict()
+    task_data['server_ids'] = ",".join(map(str, task_data['server_ids']))
+    db_task = ScheduledTask(**task_data)
+    db.add(db_task)
+    db.commit()
+    db.refresh(db_task)
+    return db_task
+
+def get_scheduled_tasks(db: Session, active_only: bool = True):
+    query = db.query(ScheduledTask)
+    if active_only:
+        query = query.filter(ScheduledTask.is_active == True)
+    return query.order_by(ScheduledTask.created_at.desc()).all()
+
+def get_scheduled_task(db: Session, task_id: int):
+    return db.query(ScheduledTask).filter(ScheduledTask.id == task_id).first()
+
+def update_scheduled_task_status(db: Session, task_id: int, is_active: bool):
+    task = db.query(ScheduledTask).filter(ScheduledTask.id == task_id).first()
+    if task:
+        task.is_active = is_active
+        db.commit()
+    return task
+
+def delete_scheduled_task(db: Session, task_id: int):
+    task = db.query(ScheduledTask).filter(ScheduledTask.id == task_id).first()
+    if task:
+        db.delete(task)
+        db.commit()
+    return task
