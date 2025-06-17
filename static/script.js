@@ -794,13 +794,15 @@ async function loadTaskHistory() {
             const tasks = await response.json();
             updateTaskHistoryList(tasks, filter);
         } else {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || '加载失败');
+            // 如果API返回错误，显示空状态而不是错误提示
+            updateTaskHistoryList([], filter);
+            console.error('API返回错误:', response.status);
         }
     } catch (error) {
+        // 只在控制台记录错误，不向用户显示
         console.error('加载任务历史失败:', error);
-        showAlert(`加载任务历史失败: ${error.message}`, 'error');
-        historyList.innerHTML = `<div class="alert alert-error">加载失败: ${error.message}</div>`;
+        // 显示空状态而不是错误提示
+        updateTaskHistoryList([], filter);
     }
 }
 
