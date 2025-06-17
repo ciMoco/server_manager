@@ -1,6 +1,8 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean
-from database import Base
 from datetime import datetime
+
+from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean
+
+from database import Base
 
 
 class Server(Base):
@@ -24,7 +26,9 @@ class Task(Base):
     task_name = Column(String(200), nullable=False)
     command = Column(Text, nullable=False)
     server_ids = Column(String(500))  # 存储服务器ID列表，用逗号分隔
-    status = Column(String(20), default="pending")  # pending, running, completed, failed
+    status = Column(
+        String(20), default="pending"
+    )  # pending, running, completed, failed
     created_at = Column(DateTime, default=datetime.utcnow)
     completed_at = Column(DateTime)
 
@@ -42,6 +46,7 @@ class TaskResult(Base):
     exit_code = Column(Integer)
     execution_time = Column(Integer)  # 执行时间（秒）
     created_at = Column(DateTime, default=datetime.utcnow)
+
 
 class CommandTemplate(Base):
     __tablename__ = "command_templates"

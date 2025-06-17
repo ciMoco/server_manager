@@ -1,14 +1,17 @@
-import paramiko
 import asyncio
 import time
 from typing import Dict, Tuple
+
+import paramiko
 
 
 class SSHManager:
     def __init__(self):
         self.connections = {}
 
-    async def execute_command(self, server_info: Dict, command: str) -> Tuple[str, str, int, int]:
+    async def execute_command(
+        self, server_info: Dict, command: str
+    ) -> Tuple[str, str, int, int]:
         """
         执行SSH命令
         返回: (stdout, stderr, exit_code, execution_time)
@@ -22,19 +25,19 @@ class SSHManager:
 
             # 连接服务器
             ssh.connect(
-                hostname=server_info['host'],
-                port=server_info['port'],
-                username=server_info['username'],
-                password=server_info['password'],
-                timeout=30
+                hostname=server_info["host"],
+                port=server_info["port"],
+                username=server_info["username"],
+                password=server_info["password"],
+                timeout=30,
             )
 
             # 执行命令
             stdin, stdout, stderr = ssh.exec_command(command, timeout=300)
 
             # 获取结果
-            output = stdout.read().decode('utf-8', errors='ignore')
-            error = stderr.read().decode('utf-8', errors='ignore')
+            output = stdout.read().decode("utf-8", errors="ignore")
+            error = stderr.read().decode("utf-8", errors="ignore")
             exit_code = stdout.channel.recv_exit_status()
 
             ssh.close()
@@ -57,21 +60,25 @@ class SSHManager:
         for server, task in tasks:
             try:
                 output, error, exit_code, exec_time = await task
-                results.append({
-                    'server': server,
-                    'output': output,
-                    'error': error,
-                    'exit_code': exit_code,
-                    'execution_time': exec_time
-                })
+                results.append(
+                    {
+                        "server": server,
+                        "output": output,
+                        "error": error,
+                        "exit_code": exit_code,
+                        "execution_time": exec_time,
+                    }
+                )
             except Exception as e:
-                results.append({
-                    'server': server,
-                    'output': '',
-                    'error': str(e),
-                    'exit_code': -1,
-                    'execution_time': 0
-                })
+                results.append(
+                    {
+                        "server": server,
+                        "output": "",
+                        "error": str(e),
+                        "exit_code": -1,
+                        "execution_time": 0,
+                    }
+                )
 
         return results
 

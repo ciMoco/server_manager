@@ -1,29 +1,35 @@
+import os
+from typing import List, Optional
+
 from fastapi import FastAPI, Depends, HTTPException
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from typing import List, Optional
-import asyncio
-import os
 
-from database import get_db, create_tables
-from models import Server, Task, TaskResult, CommandTemplate, ScheduledTask
-from schemas import (ServerCreate, ServerResponse, BatchExecuteRequest, TaskResultResponse,
-                     TaskResponse, CommandTemplateCreate, CommandTemplateResponse,
-                     ScheduledTaskCreate, ScheduledTaskResponse)
 import crud
+from database import get_db, create_tables
+from schemas import (
+    ServerCreate,
+    ServerResponse,
+    BatchExecuteRequest,
+    TaskResultResponse,
+    TaskResponse,
+    CommandTemplateCreate,
+    CommandTemplateResponse,
+    ScheduledTaskCreate,
+    ScheduledTaskResponse,
+)
 from ssh_manager import ssh_manager
 
 app = FastAPI(title="服务器批量管理平台", version="1.0.0")
 
 # 添加CORS中间件
 app.add_middleware(
-CORSMiddleware,
-allow_origins=["*"], # 生产环境应该限制具体域名
-allow_credentials=True,
-allow_methods=["*"],
-allow_headers=["*"],
+    CORSMiddleware,
+    allow_origins=["*"],  # 生产环境应该限制具体域名
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # 创建数据库表
@@ -33,10 +39,11 @@ create_tables()
 if not os.path.exists("static"):
     os.makedirs("static")
 
+
 @app.get("/")
 def read_root():
     """返回前端页面"""
-    return FileResponse('static/index.html')
+    return FileResponse("static/index.html")
 
 
 # 服务器管理API
@@ -78,14 +85,16 @@ async def batch_execute(request: BatchExecuteRequest, db: Session = Depends(get_
     for server_id in request.server_ids:
         server = crud.get_server(db, server_id)
         if server:
-            servers.append({
-                'id': server.id,
-                'name': server.name,
-                'host': server.host,
-                'port': server.port,
-                'username': server.username,
-                'password': server.password
-            })
+            servers.append(
+                {
+                    "id": server.id,
+                    "name": server.name,
+                    "host": server.host,
+                    "port": server.port,
+                    "username": server.username,
+                    "password": server.password,
+                }
+            )
 
     if not servers:
         raise HTTPException(status_code=404, detail="没有找到有效的服务器")
@@ -94,7 +103,7 @@ async def batch_execute(request: BatchExecuteRequest, db: Session = Depends(get_
         db=db,
         task_name=request.task_name,
         command=request.command,
-        server_ids=",".join(map(str, request.server_ids))
+        server_ids=",".join(map(str, request.server_ids)),
     )
 
     crud.update_task_status(db, task.id, "running")
@@ -106,13 +115,13 @@ async def batch_execute(request: BatchExecuteRequest, db: Session = Depends(get_
             crud.create_task_result(
                 db=db,
                 task_id=task.id,
-                server_id=result['server']['id'],
-                server_name=result['server']['name'],
+                server_id=result["server"]["id"],
+                server_name=result["server"]["name"],
                 command=request.command,
-                output=result['output'],
-                error=result['error'],
-                exit_code=result['exit_code'],
-                execution_time=result['execution_time']
+                output=result["output"],
+                error=result["error"],
+                exit_code=result["exit_code"],
+                execution_time=result["execution_time"],
             )
 
         crud.update_task_status(db, task.id, "completed")
@@ -120,7 +129,7 @@ async def batch_execute(request: BatchExecuteRequest, db: Session = Depends(get_
         return {
             "task_id": task.id,
             "message": f"命令执行完成，共处理 {len(results)} 台服务器",
-            "results": results
+            "results": results,
         }
 
     except Exception as e:
@@ -130,7 +139,12 @@ async def batch_execute(request: BatchExecuteRequest, db: Session = Depends(get_
 
 # 任务历史API
 @app.get("/api/tasks/", response_model=List[TaskResponse])
-def list_tasks(skip: int = 0, limit: int = 100, status: Optional[str] = None, db: Session = Depends(get_db)):
+def list_tasks(
+    skip: int = 0,
+    limit: int = 100,
+    status: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
     """获取任务历史"""
     return crud.get_tasks(db, skip=skip, limit=limit, status=status)
 
